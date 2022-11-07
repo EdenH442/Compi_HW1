@@ -6,6 +6,10 @@ void showToken(const char* tokenName)
     printf("%d %s %s\n", yylineno, tokenName, yytext);
 }
 
+void showComment()
+{
+    printf("%d %s %s\n", yylineno, "COMMENT", "//");
+};
 
 int main()
 {
@@ -85,6 +89,18 @@ int main()
               break;
           case RELOP:
               showToken("RELOP");
+              break;
+          case BINOP:
+              showToken("BINOP");
+              break;
+          case COMMENT:
+              showComment();
+              break;
+          case ID:
+              showToken("ID");
+              break;
+          case NUM:
+              showToken("NUM");
               break;
       }
 	}
