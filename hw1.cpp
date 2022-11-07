@@ -102,6 +102,13 @@ int main()
           case NUM:
               showToken("NUM");
               break;
+          case INVALID_INPUT:
+              printf("Error %c\n", yytext[0]);
+              exit(0);
+              
+          default:
+              printf("Currently Not Supported");
+              break;
       }
 	}
 	return 0;

@@ -63,6 +63,9 @@ continue						return CONTINUE;
 ({no_zero_digit}+{digit}*)|0	return NUM;
 
 
+.								return INVALID_INPUT;
+
+
 %%
 /* C Code Section */
 
