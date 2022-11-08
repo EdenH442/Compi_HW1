@@ -223,13 +223,13 @@ int main()
                 break;
             case UNCLOSED_STRING:
                 printf("Error unclosed string\n");
-                break;
+                exit(0);
             case UNDEF_ESC_SEQ:
                 printf("Error undefined escape sequence %s\n", yytext);
                 exit(0);
-          case HEX_SEQ_STRING:
-              StringHandler(); //todo
-              break;
+            case HEX_SEQ_STRING:
+                StringHandler(); //todo
+                break;
             case ERROR:
                 printError();
                 break;

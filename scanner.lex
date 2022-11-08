@@ -63,8 +63,7 @@ continue						return CONTINUE;
 ({no_zero_digit}+{digit}*)|0	return NUM;
 
 \"										BEGIN(STRING_STATE);
-<STRING_STATE>([^\\\"]|\\.)*[\r\n<<EOF>>]*				{BEGIN(INITIAL); return UNCLOSED_STRING;}
-<STRING_STATE><<EOF>>					{BEGIN(INITIAL); return UNCLOSED_STRING;}
+<STRING_STATE>([^\\\"]|\\.)*[\r\n<<EOF>>]*					{BEGIN(INITIAL); return UNCLOSED_STRING;}
 
 <STRING_STATE>\\						BEGIN(ESCAPE_SEQ);
 <ESCAPE_SEQ>(\x)						BEGIN(STRING_HEX);
@@ -77,7 +76,6 @@ continue						return CONTINUE;
 <STRING_HEX>.							return UNDEF_ESC_SEQ;
 
 <STRING_STATE>([^\\\"\n\r]|\\.)*\"		{ BEGIN(INITIAL); return STRING;}
-<STRING_STATE,ESCAPE_SEQ>.				return ERROR;
 
 
 .								return INVALID_INPUT;
