@@ -16,14 +16,14 @@ no_zero_digit 	([1-9])
 whitespace		([\t\n\x20\r])
 sc				([;])
 comma			(,)
-lparen			(\() 
+lparen			(\()
 rparen			(\))
 lbrace			(\{)
 rbrace			(\})
 assign			(=)
-relop			([<>]=?\==|!=)
+relop			(==|!=|<|>|<=|>=)
 binop			([\+\-\*\/])
-comment			((\/\/)[^\x0A\x0D\x09]*)
+comment			(\/\/[^\r\n]*)
 
 %x STRING_STATE
 %x ESCAPE_SEQ
@@ -63,12 +63,12 @@ continue						return CONTINUE;
 ({no_zero_digit}+{digit}*)|0	return NUM;
 
 \"										BEGIN(STRING_STATE);
-<STRING_STATE>[\n\r]					{BEGIN(INITIAL); return UNCLOSED_STRING;}
+<STRING_STATE>([^\\\"]|\\.)*[\r\n<<EOF>>]*				{BEGIN(INITIAL); return UNCLOSED_STRING;}
 <STRING_STATE><<EOF>>					{BEGIN(INITIAL); return UNCLOSED_STRING;}
 
 <STRING_STATE>\\						BEGIN(ESCAPE_SEQ);
-<ESCAPE_SEQ>(\x)						BEGIN(STRING_HEX); 
-<ESCAPE_SEQ>(\\|\"|\n|\r|\t|\0)			BEGIN(STRING_STATE); 
+<ESCAPE_SEQ>(\x)						BEGIN(STRING_HEX);
+<ESCAPE_SEQ>(\\|\"|\n|\r|\t|\0)			BEGIN(STRING_STATE);
 
 <ESCAPE_SEQ>.							return UNDEF_ESC_SEQ;
 

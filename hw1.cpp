@@ -28,28 +28,6 @@ void Esc_Seq_Error()
     exit(0);
 }
 
-char StringEscSeq(char escape_seq)
-{
-    switch (escape_seq)
-    {
-        case('n'):
-            return '\n';
-        case('r'):
-            return '\r';
-        case('t'):
-            return '\t';
-        case('0'):
-            return '\0';
-        case('\"'):
-            return '"';
-        case('\\'):
-            return '\\';
-        case('x'):
-            return 'x';
-        default:
-            return -1;
-    }
-}
 
 char HexHandler(const std::string& str)
 {
@@ -89,37 +67,56 @@ char HexHandler(const std::string& str)
     }
 }
 
+std::string StringEscSeq(char escape_seq)
+{
+    switch (escape_seq){
+        case 'n':
+            return "\n";
+            break;
+        case 'r':
+            return "\r";
+            break;
+        case 't':
+            return  "\t";
+            break;
+        case '\\':
+            return  "\\";
+            break;
+        case '\"':
+            return "\"";
+            break;
+        default:
+            printf("Error undefined escape sequence %c\n", escape_seq);
+            exit(0);
+    }
+}
+
 void StringHandler()
 {
-    string res_str="";
-    int len = strlen(yytext);
-    int i=0;
-    for(i ; i < len-1 ; i++)
+    string res_str;
+
+    for(int i=0 ; i < string(yytext).length() ; i++)
     {
-        if(yytext[i] == '\\')
-        {
-            char str = StringEscSeq(yytext[i+1]);
-            if(str=='\0')
-            {
-                std::cout << yylineno << " " << "STRING " << res_str << std::endl;
-                return;
-            }
-            else if(str=='x')
-            {
-                std::string text_str = (std::string)yytext;
-                HexHandler(text_str.substr(i+2,2));
-                i+=2;
-            }
-            else if(str==-1)
-            {
-                Esc_Seq_Error();
-            }
-            i++; //jump over esc seq
-            res_str.push_back(str);
+        if(yytext[i]=='\"'){
+            continue;
         }
-        else
-        {
-            res_str.push_back(yytext[i]);
+        if (yytext[i] != '\\'){
+            res_str += yytext[i];
+        }
+        else {
+            if(yytext[i+1] == 'x'){
+                string str = (string)yytext;
+                res_str += HexHandler(str.substr(i+2, 2));
+                i += 3;
+            } else if (yytext[i+1] == '0'){
+                res_str += '\0';
+                i++;
+            }
+            else {
+                res_str += StringEscSeq(yytext[i+1]);
+                i++;
+            }
+
         }
     }
     std::cout << yylineno << " " << "STRING " << res_str << std::endl;
@@ -129,117 +126,117 @@ void StringHandler()
 
 int main()
 {
-	int token;
-	while ((token = yylex()))
+    int token;
+    while ((token = yylex()))
     {
-	  switch(token)
-      {
-          case VOID:
-              showToken("VOID");
+        switch(token)
+        {
+            case VOID:
+                showToken("VOID");
+                break;
+            case INT:
+                showToken("INT");
+                break;
+            case BYTE:
+                showToken("BYTE");
+                break;
+            case B:
+                showToken("B");
+                break;
+            case BOOL:
+                showToken("BOOL");
+                break;
+            case AND:
+                showToken("AND");
+                break;
+            case OR:
+                showToken("OR");
+                break;
+            case NOT:
+                showToken("NOT");
+                break;
+            case TRUE:
+                showToken("TRUE");
+                break;
+            case FALSE:
+                showToken("FALSE");
+                break;
+            case RETURN:
+                showToken("RETURN");
+                break;
+            case IF:
+                showToken("IF");
+                break;
+            case ELSE:
+                showToken("ELSE");
+                break;
+            case WHILE:
+                showToken("WHILE");
+                break;
+            case BREAK:
+                showToken("BREAK");
+                break;
+            case CONTINUE:
+                showToken("CONTINUE");
+                break;
+            case SC:
+                showToken("SC");
+                break;
+            case COMMA:
+                showToken("COMMA");
+                break;
+            case LPAREN:
+                showToken("LPAREN");
+                break;
+            case RPAREN:
+                showToken("RPAREN");
+                break;
+            case LBRACE:
+                showToken("LBRACE");
+                break;
+            case RBRACE:
+                showToken("RBRACE");
+                break;
+            case ASSIGN:
+                showToken("ASSIGN");
+                break;
+            case RELOP:
+                showToken("RELOP");
+                break;
+            case BINOP:
+                showToken("BINOP");
+                break;
+            case COMMENT:
+                showComment();
+                break;
+            case ID:
+                showToken("ID");
+                break;
+            case NUM:
+                showToken("NUM");
+                break;
+            case INVALID_INPUT:
+                printf("Error %c\n", yytext[0]);
+                exit(0);
+            case STRING:
+                StringHandler();
+                break;
+            case UNCLOSED_STRING:
+                printf("Error unclosed string\n");
+                break;
+            case UNDEF_ESC_SEQ:
+                printf("Error undefined escape sequence %s\n", yytext);
+                exit(0);
+          case HEX_SEQ_STRING:
+              StringHandler(); //todo
               break;
-          case INT:
-              showToken("INT");
-              break;
-          case BYTE:
-              showToken("BYTE");
-              break;
-          case B:
-              showToken("B");
-              break;
-          case BOOL:
-              showToken("BOOL");
-              break;
-          case AND:
-              showToken("AND");
-              break;
-          case OR:
-              showToken("OR");
-              break;
-          case NOT:
-              showToken("NOT");
-              break;
-          case TRUE:
-              showToken("TRUE");
-              break;
-          case FALSE:
-              showToken("FALSE");
-              break;
-          case RETURN:
-              showToken("RETURN");
-              break;
-          case IF:
-              showToken("IF");
-              break;
-          case ELSE:
-              showToken("ELSE");
-              break;
-          case WHILE:
-              showToken("WHILE");
-              break;
-          case BREAK:
-              showToken("BREAK");
-              break;
-          case CONTINUE:
-              showToken("CONTINUE");
-              break;
-          case SC:
-              showToken("SC");
-              break;
-          case COMMA:
-              showToken("COMMA");
-              break;
-          case LPAREN:
-              showToken("LPAREN");
-              break;
-          case RPAREN:
-              showToken("RPAREN");
-              break;
-          case LBRACE:
-              showToken("LBRACE");
-              break;
-          case RBRACE:
-              showToken("RBRACE");
-              break;
-          case ASSIGN:
-              showToken("ASSIGN");
-              break;
-          case RELOP:
-              showToken("RELOP");
-              break;
-          case BINOP:
-              showToken("BINOP");
-              break;
-          case COMMENT:
-              showComment();
-              break;
-          case ID:
-              showToken("ID");
-              break;
-          case NUM:
-              showToken("NUM");
-              break;
-          case INVALID_INPUT:
-              printf("Error %c\n", yytext[0]);
-              exit(0);
-          case STRING:
-              StringHandler();
-              break;
-          case UNCLOSED_STRING:
-              printf("Error unclosed string\n");
-              break;
-          case UNDEF_ESC_SEQ:
-              printf("Error undefined escape sequence %s\n", yytext);
-              exit(0);
-//          case HEX_SEQ_STRING:
-//              HexHandler(); //todo
-//              break;
-          case ERROR:
-              printError();
-              break;
-          default:
-              printf("Currently Not Supported");
-              break;
-      }
-	}
-	return 0;
+            case ERROR:
+                printError();
+                break;
+            default:
+                printf("Currently Not Supported");
+                break;
+        }
+    }
+    return 0;
 }
