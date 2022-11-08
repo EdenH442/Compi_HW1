@@ -1,6 +1,7 @@
 #ifndef TOKENS_HPP_
 #define TOKENS_HPP_
 #include <cstdlib>
+
   enum tokentype
   {
     VOID = 1,
@@ -33,8 +34,14 @@
     NUM = 28,
     STRING = 29,
 
-    INVALID_INPUT = 30
+    INVALID_INPUT = 30,
+    UNCLOSED_STRING =31,
+    UNDEF_ESC_SEQ=32,
+    HEX_SEQ_STRING=33,
+    ERROR = 34
   };
+
+  void showToken(const char* tokenName);
   extern int yylineno;
   extern char* yytext;
   extern int yyleng;

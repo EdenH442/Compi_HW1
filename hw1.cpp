@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include "tokens.hpp"
+#include <cstring>
+#include <string>
+#include <iostream>
+
+using std::string;
 
 void showToken(const char* tokenName)
 {
@@ -9,7 +14,118 @@ void showToken(const char* tokenName)
 void showComment()
 {
     printf("%d %s %s\n", yylineno, "COMMENT", "//");
-};
+}
+
+void printError()
+{
+    printf("Error %s\n", yytext);
+    exit(0);
+}
+
+void Esc_Seq_Error()
+{
+    printf("Error undefined escape sequence %s\n", yytext);
+    exit(0);
+}
+
+char StringEscSeq(char escape_seq)
+{
+    switch (escape_seq)
+    {
+        case('n'):
+            return '\n';
+        case('r'):
+            return '\r';
+        case('t'):
+            return '\t';
+        case('0'):
+            return '\0';
+        case('\"'):
+            return '"';
+        case('\\'):
+            return '\\';
+        case('x'):
+            return 'x';
+        default:
+            return -1;
+    }
+}
+
+char HexHandler(const std::string& str)
+{
+    bool not_valid = false;
+    std::string err;
+    for(int i = 0; i < str.length(); ++i){
+        if(!(std::isalnum(str[i]) || std::isalpha(str[i]))){
+            not_valid= true;
+            //hex is shorter than 2 characters
+            if(str[i]=='\"'){
+                printf("Error undefined escape sequence %s\n", ("x"+err).c_str());
+                exit(0);
+            }
+        }
+        else{
+            err+=str[i];
+        }
+    }
+    if(not_valid){
+        printf("Error undefined escape sequence %s\n", ("x"+str).c_str());
+        exit(0);
+    }
+    int number;
+    try{
+        number = std::stoi(str, nullptr, 0x10);
+    }
+    catch(const std::invalid_argument& e) {
+        printf("Error undefined escape sequence %s\n", ("x"+str).c_str());
+        exit(0);
+    }
+    if (number>=0x00 && number<=0x7f){
+        return (char)number;
+    }
+    else{
+        printf("Error undefined escape sequence %s\n", ("x"+str).c_str());
+        exit(0);
+    }
+}
+
+void StringHandler()
+{
+    string res_str="";
+    int len = strlen(yytext);
+    int i=0;
+    for(i ; i < len-1 ; i++)
+    {
+        if(yytext[i] == '\\')
+        {
+            char str = StringEscSeq(yytext[i+1]);
+            if(str=='\0')
+            {
+                std::cout << yylineno << " " << "STRING " << res_str << std::endl;
+                return;
+            }
+            else if(str=='x')
+            {
+                std::string text_str = (std::string)yytext;
+                HexHandler(text_str.substr(i+2,2));
+                i+=2;
+            }
+            else if(str==-1)
+            {
+                Esc_Seq_Error();
+            }
+            i++; //jump over esc seq
+            res_str.push_back(str);
+        }
+        else
+        {
+            res_str.push_back(yytext[i]);
+        }
+    }
+    std::cout << yylineno << " " << "STRING " << res_str << std::endl;
+}
+
+
 
 int main()
 {
@@ -105,7 +221,21 @@ int main()
           case INVALID_INPUT:
               printf("Error %c\n", yytext[0]);
               exit(0);
-              
+          case STRING:
+              StringHandler();
+              break;
+          case UNCLOSED_STRING:
+              printf("Error unclosed string\n");
+              break;
+          case UNDEF_ESC_SEQ:
+              printf("Error undefined escape sequence %s\n", yytext);
+              exit(0);
+//          case HEX_SEQ_STRING:
+//              HexHandler(); //todo
+//              break;
+          case ERROR:
+              printError();
+              break;
           default:
               printf("Currently Not Supported");
               break;
