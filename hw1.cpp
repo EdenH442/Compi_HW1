@@ -5,6 +5,7 @@
 
 using std::string;
 
+//CHECK CHECK
 void showToken(const char* tokenName)
 {
     printf("%d %s %s\n", yylineno, tokenName, yytext);

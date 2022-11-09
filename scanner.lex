@@ -79,7 +79,7 @@ continue						return CONTINUE;
 <STRING_STATE>([^\\\"\n\r]|\\.)*\"	                    	{ BEGIN(INITIAL); return STRING;}
 
 
-.								                               return INVALID_INPUT;
+.								                             return INVALID_INPUT;
 
 
 %%
